@@ -39,6 +39,11 @@ async def roll(ctx, user_post):
     die_amount = []
     die = []
     
+    dice_over = [ "My dice bag isn't that big :(",
+                  "Laura Bailey stole all the dice",
+                  "I don't own a bag of holding",
+                  "That is too many dice sir...",
+                ]
 
     user_request = [char for char in user_post]
     command_index = user_request.index('d')
@@ -58,8 +63,8 @@ async def roll(ctx, user_post):
 
     if n_die == 20 and get_roll == 20: get_roll = str("Natural 20!")
     if n_die == 20 and get_roll == 1: get_roll = str("Critical 1!")
-    
-    if n_die_amount > 99: await ctx.send("My dice bag isn't that big :(")
+
+    if n_die_amount > 99: await ctx.send(random.choice(dice_over))
     else: await ctx.send(f'Rolling {n_die_amount}d{n_die}\nYou rolled: {get_roll}')
 
 client.run(TOKEN)
