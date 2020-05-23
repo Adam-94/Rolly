@@ -25,46 +25,49 @@ def random_dice(die_amount, die):
 
     return total_roll
 
-def get_dice_info(dice_amount = [], die = []):
-    dice_amount = int("".join(dice_amount))
-    die = int("".join(die))
-
-    return dice_amount, die
-
 @client.command()
 async def roll(ctx, user_post):
-    get_roll = 0
-    n_die = 0
-    n_die_amount= 0 
-    die_amount = []
-    die = []
-    
+
     dice_over = [ "My dice bag isn't that big :(",
                   "Laura Bailey stole all the dice",
                   "I don't own a bag of holding",
                   "That is too many dice sir...",
                 ]
 
-    user_request = [char for char in user_post]
-    command_index = user_request.index('d')
-    print(command_index, '\n')
+    get_roll = 0
+    die_amount = []
+    die = []
+    modifier = []
 
+
+    user_request = list(user_post)
+    command_index = user_request.index('d')
+    if '+' in user_request:
+        modifier = int("".join(list(user_request.pop())))
+    user_request.pop()
+
+    """Getting die amount and then removing from list"""
     for index in range(0, command_index):
         die_amount.append(user_request[index])
+        user_request.pop(index)
+    user_request.remove('d')
 
-    for index in range(command_index+1, len(user_request)):
-        die.append(user_request[index])
+    die = int("".join(user_request))
+    die_amount = int("".join(die_amount))
 
-    n_die_amount, n_die = get_dice_info(die_amount, die)
-    print("Die amount: ", n_die_amount, "\nDie: ", n_die)
-        
-    if n_die_amount < 100:
-        get_roll = random_dice(n_die_amount, n_die)
 
-    if n_die == 20 and get_roll == 20: get_roll = str("Natural 20!")
-    if n_die == 20 and get_roll == 1: get_roll = str("Critical 1!")
+    if die_amount > 1 and die_amount < 100:
+        get_roll = random_dice(die_amount, die)
 
-    if n_die_amount > 99: await ctx.send(random.choice(dice_over))
-    else: await ctx.send(f'Rolling {n_die_amount}d{n_die}\nYou rolled: {get_roll}')
+    if die == 20 and get_roll == 20: 
+        get_roll = str("Natural 20!")
+    if die == 20 and get_roll == 1: 
+        get_roll = str("Critical 1!")
 
+    if die_amount > 99: 
+        await ctx.send(random.choice(dice_over))
+    elif modifier > 0: 
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}\nTotal: {modifier+get_roll}')
+    else: 
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}')
 client.run(TOKEN)
