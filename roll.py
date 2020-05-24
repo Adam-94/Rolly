@@ -24,6 +24,7 @@ async def roll(ctx, user_post):
                 ]
 
     get_roll = 0
+    roll = 0
     modifier = 0
     total = 0
     die_amount = []
@@ -44,8 +45,14 @@ async def roll(ctx, user_post):
     die = int("".join(user_request))
     die_amount = int("".join(die_amount))
 
-    get_roll = random.randint(1, die)
-    total = get_roll + modifier
+
+    get_roll = [random.randint(1, die) for _ in range(die_amount)]
+    n = len(get_roll)
+    for i in range(n):
+        roll += get_roll[i]
+
+
+    total = roll + modifier
 
     if die == 20 and get_roll == 20: 
         get_roll = str("Natural 20!")
@@ -55,7 +62,7 @@ async def roll(ctx, user_post):
     if die_amount > 99: 
         await ctx.send(random.choice(dice_over))
     elif modifier > 0: 
-        await ctx.send(f'Rolling {die_amount}d{die}+{modifier}\nYou rolled: {get_roll}\nTotal: {total}')
+        await ctx.send(f'Rolling {die_amount}d{die}+{modifier}\nYou rolled: {roll}\nTotal: {total}')
     else: 
-        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}')
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {roll}')
 client.run(TOKEN)
