@@ -51,18 +51,16 @@ async def roll(ctx, user_post):
     for i in range(n):
         roll += get_roll[i]
 
-
     total = roll + modifier
-
-    if die == 20 and get_roll == 20: 
-        get_roll = str("Natural 20!")
-    if die == 20 and get_roll == 1: 
-        get_roll = str("Critical 1!")
+    if die == 20 and roll == 20: 
+        roll = str("Natural 20!")
+    if die == 20 and roll == 1: 
+        roll = str("Critical 1!")
 
     if die_amount > 99: 
         await ctx.send(random.choice(dice_over))
     elif modifier > 0: 
-        await ctx.send(f'Rolling {die_amount}d{die}+{modifier}\nYou rolled: {roll}\nTotal: {total}')
+        await ctx.send(f'Rolling {die_amount}d{die}+{modifier}\nYou rolled: {get_roll}\nTotal: {total}')
     else: 
-        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {roll}')
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}')
 client.run(TOKEN)
