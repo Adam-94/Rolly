@@ -33,7 +33,7 @@ async def roll(ctx, user_post):
     command_index = user_request.index('d')
     if '+' in user_request:
         modifier = int("".join(list(user_request.pop())))
-    user_request.pop()
+        user_request.pop()
 
     """Getting die amount and then removing from list"""
     for index in range(0, command_index):
