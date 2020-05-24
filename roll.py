@@ -61,6 +61,8 @@ async def roll(ctx, user_post):
         await ctx.send(random.choice(dice_over))
     elif modifier > 0: 
         await ctx.send(f'Rolling {die_amount}d{die}+{modifier}\nYou rolled: {get_roll}\nTotal: {total}')
+    elif die_amount > 1:
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}\nTotal: {total}')
     else: 
-        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {get_roll}')
+        await ctx.send(f'Rolling {die_amount}d{die}\nYou rolled: {total}')
 client.run(TOKEN)
