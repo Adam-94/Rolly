@@ -17,5 +17,8 @@ def screenshot(message):
     required_height = driver.execute_script('return document.body.parentNode.scrollHeight')
 
     driver.set_window_size(required_width, required_height)
-    driver.find_element_by_css_selector("#results").screenshot("screenshot.png")  # avoids scrollbar
+    element = driver.find_element_by_css_selector("#results")
+    screen_shot = element.screenshot_as_base64()
     driver.set_window_size(original_size['width'], original_size['height'])
+
+    return screen_shot
