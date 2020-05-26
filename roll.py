@@ -1,6 +1,7 @@
 import discord
 import random
 import os
+import io
 
 from search import screenshot
 from dotenv import load_dotenv, find_dotenv
@@ -15,14 +16,13 @@ client = commands.Bot(command_prefix= "-")
 @client.event
 async def on_ready():
     print("Bot is ready!")
-    
+
 @client.command()
 async def search(ctx, user_post):
     if "_" in user_post:
         user_post = user_post.replace("_", "%20")
-    screenshot(user_post)
-    await ctx.send(file=discord.File("screenshot.png"))
-
+    img = io.BytesIO(screenshot(user_post))
+    await ctx.send(file=discord.File(img, 'img.png'))
 
 @client.command()
 async def roll(ctx, user_post):
