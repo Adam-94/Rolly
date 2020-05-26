@@ -3,11 +3,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from PIL import Image
 
+import os
+
 def screenshot(message):
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--start-maximized')
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
     driver.get("https://radai.github.io/dnd5tools/?q="+message)
 
     original_size = driver.get_window_size()
