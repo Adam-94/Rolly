@@ -27,101 +27,108 @@ async def find(ctx, user_post):
     screenshot(user_post)
     await ctx.send(file=discord.File('screenshot.png'))
 
+def die_info(user_message):
+    die_amount = []
+    die = []
+    modifer = []
+
+    plus_or_minus = False
+    modifer_index = 0
+    
+    user_request = list(user_message)
+    n = len(user_request)
+    d_prefix = user_request.index('d')
+    
+    if '+' in user_request:
+        plus_or_minus = True
+        modifer_index = user_request.index('+')
+    elif '-' in user_request:
+        plus_or_minus = False
+        modifer_index = user_request.index('-')
+    else:
+        plus_or_minus = None
+
+    if plus_or_minus != None:
+        for digits in range(modifer_index+1, n):
+            modifer.append(user_request[digits])
+        
+    # Die amount
+    for digits in range(0, d_prefix):
+        die_amount.append(user_request[digits])
+        
+    # Die 
+    if plus_or_minus == None:
+        for digits in range(d_prefix+1, n):
+            die.append(user_request[digits])
+        modifer.append(0)
+    else:
+        for digits in range(d_prefix+1, modifer_index):
+            die.append(user_request[digits])
+        
+    # Concatonating lists into integers
+    die_amount = int(''.join(map(str, die_amount)))
+    die = int(''.join(map(str, die)))
+    modifer = int(''.join(map(str, modifer)))
+    
+
+    return die_amount, die, modifer
+
 @client.command()
-async def roll(ctx, user_post):
+async def roll(ctx, user_message):
 
     dice_over = [ "My dice bag isn't that big :(",
                   "Laura Bailey stole all the dice",
                   "I don't own a bag of holding",
                   "That is too many dice sir...",
                 ]
+    die_amount = 0
+    modifier = 0
+    die = 0
 
     get_roll = 0
     roll = 0
-    modifier = ""
     total = 0
-    die_amount = []
-    die = []
-    plus_or_minus = None
 
-    user_request = list(user_post)
-    n = len(user_request)
-    command_index = user_request.index('d')
-
-    if '+' in user_request:
-        plus_or_minus = True
-        index = user_request.index('+')
-    elif '-' in user_request:
-        plus_or_minus = False
-        index = user_request.index('-')
-
-    """extract modifier"""
-    if plus_or_minus == True or plus_or_minus == False:
-        for i in range(index,n):
-            if user_request[i].isdigit():
-               modifier += "".join(list(user_request[i]))
-
-        """remove + and modifier from list"""
-        if len(modifier) == 2:
-            del user_request[-3:]
-        elif len(modifier) == 1:
-            del user_request[-2:]
-
-        modifier = int(modifier)
-
-
-    """Getting die amount and then removing from list"""
-    for index in range(0, command_index):
-        die_amount.append(user_request[index])
-        user_request.pop(index)
-    user_request.remove('d')
-
-    die = int("".join(user_request))
-    die_amount = int("".join(die_amount))
+    die_amount, die, modifier = die_info(user_message)
+    if die_amount > 99:
+        await ctx.send(random.choice(dice_over))
+        return 1
 
     get_roll = [random.randint(1, die) for _ in range(die_amount)]
-    n = len(get_roll)
+    roll = sum(get_roll)
 
     if die == 20 and die_amount > 1:
         high = max(get_roll)
         low = min(get_roll)
-        if modifier != "" and plus_or_minus == True:
+        if modifier > 0:
             high += modifier
             low += modifier
         else:
             high -= modifier
             low -= modifier
 
+    roll += modifier
 
-    for i in range(n):
-        roll += get_roll[i]
-
-    if plus_or_minus == True:
-        roll += modifier
-    elif plus_or_minus == False:
-        roll -= modifier
-
-    if die == 20 and 20 in get_roll:
+    if die_amount == 1 and die == 20 and 20 in get_roll:
         index = get_roll.index(20)
         get_roll[index] = str("Natural 20!")
         roll = str("Natural 20!")
-    if die == 20 and 1 in get_roll:
+    if die_amount == 1 and die == 20 and 1 in get_roll:
         index = get_roll.index(1)
         get_roll[index] = str("Critical 1!")
         roll = str("Critical 1!")
 
-    if die_amount > 99:
-        await ctx.send(random.choice(dice_over))
-
     elif die == 20 and die_amount == 2:
-        await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}')
+        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}')
 
     elif die_amount == 1 and modifier != "":
-        await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal: {roll}')
+        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}')
 
     elif die_amount > 1:
-        await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal: {roll}')
+        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}')
 
     else:
-        await ctx.send(f'Rolling {user_post}\nYou rolled: {roll}')
+        await ctx.send(f'Rolling {user_message}\nYou rolled: {roll}')
+
+
 client.run(TOKEN)
