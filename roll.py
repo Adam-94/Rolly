@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import discord
 import random
 import os
@@ -18,11 +20,12 @@ async def on_ready():
     print("Bot is ready!")
 
 @client.command()
-async def search(ctx, user_post):
+async def find(ctx, user_post):
     if "_" in user_post:
         user_post = user_post.replace("_", "%20")
-    img = io.BytesIO(screenshot(user_post))
-    await ctx.send(file=discord.File(img, 'img.png'))
+        print(user_post)
+    screenshot(user_post)
+    await ctx.send(file=discord.File('screenshot.png'))
 
 @client.command()
 async def roll(ctx, user_post):
@@ -57,16 +60,16 @@ async def roll(ctx, user_post):
         for i in range(index,n):
             if user_request[i].isdigit():
                modifier += "".join(list(user_request[i]))
-            
-        """remove + and modifier from list""" 
+
+        """remove + and modifier from list"""
         if len(modifier) == 2:
             del user_request[-3:]
         elif len(modifier) == 1:
             del user_request[-2:]
 
         modifier = int(modifier)
-         
-          
+
+
     """Getting die amount and then removing from list"""
     for index in range(0, command_index):
         die_amount.append(user_request[index])
@@ -88,36 +91,37 @@ async def roll(ctx, user_post):
         else:
             high -= modifier
             low -= modifier
-            
-   
+
+
     for i in range(n):
         roll += get_roll[i]
-    
+
     if plus_or_minus == True:
         roll += modifier
-    else:
+    elif plus_or_minus == False:
         roll -= modifier
 
-    if die == 20 and 20 in get_roll: 
+    if die == 20 and 20 in get_roll:
         index = get_roll.index(20)
         get_roll[index] = str("Natural 20!")
+        roll = str("Natural 20!")
     if die == 20 and 1 in get_roll:
-        index = get_roll.index(1) 
+        index = get_roll.index(1)
         get_roll[index] = str("Critical 1!")
+        roll = str("Critical 1!")
 
-    
-    if die_amount > 99: 
+    if die_amount > 99:
         await ctx.send(random.choice(dice_over))
-    
+
     elif die == 20 and die_amount == 2:
         await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}')
-    
-    elif die_amount == 1 and modifier != "": 
+
+    elif die_amount == 1 and modifier != "":
         await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal: {roll}')
-    
+
     elif die_amount > 1:
         await ctx.send(f'Rolling {user_post}\nYou rolled: {get_roll}\nTotal: {roll}')
-    
-    else: 
+
+    else:
         await ctx.send(f'Rolling {user_post}\nYou rolled: {roll}')
 client.run(TOKEN)
