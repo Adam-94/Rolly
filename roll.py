@@ -27,6 +27,15 @@ async def find(ctx, user_post):
     screenshot(user_post)
     await ctx.send(file=discord.File('screenshot.png'))
 
+
+@client.command()
+async def purge(ctx):
+    def not_pinned(msg):
+        return not msg.pinned
+    purged = await ctx.channel.purge(limit=100, check=not_pinned)
+    await ctx.send(f"Successfully removed {len(purged)} non-pinned messages!")
+
+
 def die_info(user_message):
     die_amount = []
     die = []
