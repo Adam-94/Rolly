@@ -74,12 +74,11 @@ def die_info(user_message):
         for digits in range(d_prefix+1, modifer_index):
             die.append(user_request[digits])
         
-    # Concatonating lists into integers
+    # Concatenating lists into integers
     die_amount = int(''.join(map(str, die_amount)))
     die = int(''.join(map(str, die)))
     modifer = int(''.join(map(str, modifer)))
     
-
     return die_amount, die, modifer
 
 @client.command()
