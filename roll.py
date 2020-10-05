@@ -79,7 +79,7 @@ def die_info(user_message):
     die = int(''.join(map(str, die)))
     modifer = int(''.join(map(str, modifer)))
     
-    return die_amount, die, modifer
+    return die_amount, die, modifer, plus_or_minus
 
 @client.command()
 async def roll(ctx, user_message):
@@ -97,7 +97,8 @@ async def roll(ctx, user_message):
     roll = 0
     total = 0
 
-    die_amount, die, modifier = die_info(user_message)
+    die_amount, die, modifier, plus_or_minus = die_info(user_message)
+
     if die_amount > 99:
         await ctx.send(random.choice(dice_over))
         return 1
@@ -115,7 +116,11 @@ async def roll(ctx, user_message):
             high -= modifier
             low -= modifier
 
-    roll += modifier
+
+    if plus_or_minus == True:
+        roll += modifier
+    else:
+        roll -= modifier
 
     if die_amount == 1 and die == 20 and 20 in get_roll:
         index = get_roll.index(20)
