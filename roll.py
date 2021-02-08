@@ -11,13 +11,15 @@ from discord.ext import commands
 
 random.seed()
 load_dotenv()
-TOKEN = os.getenv('TOKEN')
+TOKEN = os.getenv("TOKEN")
 
-client = commands.Bot(command_prefix= "-")
+client = commands.Bot(command_prefix="-")
+
 
 @client.event
 async def on_ready():
     print("Bot is ready!")
+
 
 @client.command()
 async def find(ctx, user_post):
@@ -25,13 +27,14 @@ async def find(ctx, user_post):
         user_post = user_post.replace("_", "%20")
         print(user_post)
     screenshot(user_post)
-    await ctx.send(file=discord.File('screenshot.png'))
+    await ctx.send(file=discord.File("screenshot.png"))
 
 
 @client.command()
 async def purge(ctx):
     def not_pinned(msg):
         return not msg.pinned
+
     purged = await ctx.channel.purge(limit=100, check=not_pinned)
     await ctx.send(f"Successfully removed {len(purged)} non-pinned messages!")
 
@@ -43,52 +46,54 @@ def die_info(user_message):
 
     plus_or_minus = False
     modifer_index = 0
-    
+
     user_request = list(user_message)
     n = len(user_request)
-    d_prefix = user_request.index('d')
-    
-    if '+' in user_request:
+    d_prefix = user_request.index("d")
+
+    if "+" in user_request:
         plus_or_minus = True
-        modifer_index = user_request.index('+')
-    elif '-' in user_request:
+        modifer_index = user_request.index("+")
+    elif "-" in user_request:
         plus_or_minus = False
-        modifer_index = user_request.index('-')
+        modifer_index = user_request.index("-")
     else:
         plus_or_minus = None
 
     if plus_or_minus != None:
-        for digits in range(modifer_index+1, n):
+        for digits in range(modifer_index + 1, n):
             modifer.append(user_request[digits])
-        
+
     # Die amount
     for digits in range(0, d_prefix):
         die_amount.append(user_request[digits])
-        
-    # Die 
+
+    # Die
     if plus_or_minus == None:
-        for digits in range(d_prefix+1, n):
+        for digits in range(d_prefix + 1, n):
             die.append(user_request[digits])
         modifer.append(0)
     else:
-        for digits in range(d_prefix+1, modifer_index):
+        for digits in range(d_prefix + 1, modifer_index):
             die.append(user_request[digits])
-        
+
     # Concatenating lists into integers
-    die_amount = int(''.join(map(str, die_amount)))
-    die = int(''.join(map(str, die)))
-    modifer = int(''.join(map(str, modifer)))
-    
+    die_amount = int("".join(map(str, die_amount)))
+    die = int("".join(map(str, die)))
+    modifer = int("".join(map(str, modifer)))
+
     return die_amount, die, modifer, plus_or_minus
+
 
 @client.command()
 async def roll(ctx, user_message):
 
-    dice_over = [ "My dice bag isn't that big :(",
-                  "Laura Bailey stole all the dice",
-                  "I don't own a bag of holding",
-                  "That is too many dice sir...",
-                ]
+    dice_over = [
+        "My dice bag isn't that big :(",
+        "Laura Bailey stole all the dice",
+        "I don't own a bag of holding",
+        "That is too many dice sir...",
+    ]
     die_amount = 0
     modifier = 0
     die = 0
@@ -106,19 +111,19 @@ async def roll(ctx, user_message):
     get_roll = [random.randint(1, die) for _ in range(die_amount)]
     roll = sum(get_roll)
 
-    if die == 20 and die_amount > 1:
+    if die_amount > 1:
         high = max(get_roll)
         low = min(get_roll)
-        if modifier > 0:
+        if plus_or_minus == True:
             high += modifier
             low += modifier
-        else:
+        elif plus_or_minus == False:
             high -= modifier
             low -= modifier
 
-
-    if plus_or_minus == True:
+    elif plus_or_minus == True and die_amount == 1:
         roll += modifier
+
     else:
         roll -= modifier
 
@@ -132,16 +137,18 @@ async def roll(ctx, user_message):
         roll = str("Critical 1!")
 
     elif die == 20 and die_amount == 2:
-        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}')
+        await ctx.send(
+            f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}"
+        )
 
     elif die_amount == 1 and modifier != "":
-        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}')
+        await ctx.send(f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}")
 
     elif die_amount > 1:
-        await ctx.send(f'Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}')
+        await ctx.send(f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}")
 
     else:
-        await ctx.send(f'Rolling {user_message}\nYou rolled: {roll}')
+        await ctx.send(f"Rolling {user_message}\nYou rolled: {roll}")
 
 
 client.run(TOKEN)
