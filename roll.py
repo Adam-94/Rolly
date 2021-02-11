@@ -4,6 +4,9 @@ import discord
 import random
 import os
 import io
+import re
+import sys
+
 
 from search import screenshot
 from dotenv import load_dotenv, find_dotenv
@@ -39,116 +42,65 @@ async def purge(ctx):
     await ctx.send(f"Successfully removed {len(purged)} non-pinned messages!")
 
 
-def die_info(user_message):
-    die_amount = []
-    die = []
-    modifer = []
-
-    plus_or_minus = False
-    modifer_index = 0
-
-    user_request = list(user_message)
-    n = len(user_request)
-    d_prefix = user_request.index("d")
-
-    if "+" in user_request:
-        plus_or_minus = True
-        modifer_index = user_request.index("+")
-    elif "-" in user_request:
-        plus_or_minus = False
-        modifer_index = user_request.index("-")
-    else:
-        plus_or_minus = None
-
-    if plus_or_minus != None:
-        for digits in range(modifer_index + 1, n):
-            modifer.append(user_request[digits])
-
-    # Die amount
-    for digits in range(0, d_prefix):
-        die_amount.append(user_request[digits])
-
-    # Die
-    if plus_or_minus == None:
-        for digits in range(d_prefix + 1, n):
-            die.append(user_request[digits])
-        modifer.append(0)
-    else:
-        for digits in range(d_prefix + 1, modifer_index):
-            die.append(user_request[digits])
-
-    # Concatenating lists into integers
-    die_amount = int("".join(map(str, die_amount)))
-    die = int("".join(map(str, die)))
-    modifer = int("".join(map(str, modifer)))
-
-    return die_amount, die, modifer, plus_or_minus
-
-
 @client.command()
 async def roll(ctx, user_message):
+    pattern = re.compile(
+        r"(?P<amount>[0-9]+)([dD])(?P<sides>[0-9]+)?(?P<mod>[+-])?(?P<val>[0-9]+)?"
+    )
 
-    dice_over = [
-        "My dice bag isn't that big :(",
-        "Laura Bailey stole all the dice",
-        "I don't own a bag of holding",
-        "That is too many dice sir...",
-    ]
-    die_amount = 0
-    modifier = 0
-    die = 0
+    match = re.match(pattern, user_message)
+    if not match:
+        raise ValueError()
 
-    get_roll = 0
-    roll = 0
-    total = 0
+    amount = int(match.group("amount"))
+    sides = int(match.group("sides"))
+    plus_or_minus = str(match.group("mod"))
 
-    die_amount, die, modifier, plus_or_minus = die_info(user_message)
+    try:
+        modifier = int(match.group("val"))
+    except:
+        modifier = None
 
-    if die_amount > 99:
-        await ctx.send(random.choice(dice_over))
-        return 1
+    if plus_or_minus == "+":
+        plus_or_minus = True
+    elif plus_or_minus == "-":
+        plus_or_minus = False
 
-    get_roll = [random.randint(1, die) for _ in range(die_amount)]
-    roll = sum(get_roll)
-
-    if die_amount > 1:
-        high = max(get_roll)
-        low = min(get_roll)
-        if plus_or_minus == True:
-            high += modifier
-            low += modifier
-        elif plus_or_minus == False:
-            high -= modifier
-            low -= modifier
-
-    elif plus_or_minus == True and die_amount == 1:
-        roll += modifier
-
+    if amount > 1:
+        await ctx.send(multi_roll(amount, sides, plus_or_minus, modifier))
     else:
-        roll -= modifier
+        await ctx.send(single_roll(sides, plus_or_minus, modifier))
 
-    if die_amount == 1 and die == 20 and 20 in get_roll:
-        index = get_roll.index(20)
-        get_roll[index] = str("Natural 20!")
-        roll = str("Natural 20!")
-    if die_amount == 1 and die == 20 and 1 in get_roll:
-        index = get_roll.index(1)
-        get_roll[index] = str("Critical 1!")
-        roll = str("Critical 1!")
 
-    elif die == 20 and die_amount == 2:
-        await ctx.send(
-            f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal high: {high}\nTotal low: {low}"
-        )
+def single_roll(sides, plus_or_minus, modifier):
+    roll = random.randint(1, sides)
+    if plus_or_minus is not None:
+        total = 0
 
-    elif die_amount == 1 and modifier != "":
-        await ctx.send(f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}")
+    if plus_or_minus == True:
+        total = roll + modifier
+        return f"You rolled: {roll}\nTotal Roll: {total}"
 
-    elif die_amount > 1:
-        await ctx.send(f"Rolling {user_message}\nYou rolled: {get_roll}\nTotal: {roll}")
-
+    elif plus_or_minus == False:
+        total = roll - modifier
+        return f"You rolled: {roll}\nTotal Roll: {total}"
     else:
-        await ctx.send(f"Rolling {user_message}\nYou rolled: {roll}")
+        return f"You rolled: {roll}"
+
+
+def multi_roll(amount, sides, plus_or_minus, modifier):
+    roll = [random.randint(1, sides) for _ in range(amount)]
+    if plus_or_minus is not None:
+        total = []
+
+    if plus_or_minus == True:
+        total = [num + modifier for num in roll]
+        return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
+    elif plus_or_minus == False:
+        total = [num - modifier for num in roll]
+        return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
+    else:
+        return f"You rolled: {*roll,}"
 
 
 client.run(TOKEN)
