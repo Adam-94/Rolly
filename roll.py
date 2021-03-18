@@ -6,7 +6,7 @@ import os
 import io
 import re
 import sys
-
+import datetime
 
 from search import screenshot
 from dotenv import load_dotenv, find_dotenv
@@ -93,14 +93,24 @@ def multi_roll(amount, sides, plus_or_minus, modifier):
     if plus_or_minus is not None:
         total = []
 
-    if plus_or_minus == True:
-        total = [num + modifier for num in roll]
-        return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
-    elif plus_or_minus == False:
-        total = [num - modifier for num in roll]
-        return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
-    else:
-        return f"You rolled: {*roll,}"
+    if sides == 20:
+        if plus_or_minus == True:
+            total = [num + modifier for num in roll]
+            return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
+        elif plus_or_minus == False:
+            total = [num - modifier for num in roll]
+            return f"You rolled: {*roll,}\nTotal Roll: {*total,}"
+        else:
+            return f"Total roll: {*roll,}"
 
+    elif sides < 20:
+        if plus_or_minus == True:
+            total = sum(roll) + modifier
+            return f"You rolled: {*roll,}\nTotal Roll: {total}"
+        elif plus_or_minus == False:
+            total = sum(roll) - modifier
+            return f"You rolled: {*roll,}\nTotal Roll: {total}"
+        else:
+            return f"You rolled: {*roll,}\nTotal Roll: {sum(roll)}"
 
 client.run(TOKEN)
